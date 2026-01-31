@@ -71,7 +71,7 @@ namespace RecipeBook
                 // Как в ConfigHub: окно поверх остальных элементов и в дереве канваса
                 if (!ReferenceEquals(_rootFrame.RectTransform.Parent, GUI.Canvas))
                     _rootFrame.RectTransform.Parent = GUI.Canvas;
-                _rootFrame.SetAsLastChild();
+                try { _rootFrame.SetAsLastChild(); } catch { /* GUICanvas не держит детей в children — игнорируем */ }
                 _rootFrame.AddToGUIUpdateList(order: 1);
             }
         }
@@ -110,7 +110,11 @@ namespace RecipeBook
         private static readonly Color HelmodPanelBg = new Color(0.10f, 0.12f, 0.16f, 0.98f);
         private static readonly Color HelmodHeaderBg = new Color(0.14f, 0.17f, 0.22f, 0.98f);
         private static readonly Color HelmodRowAlt = new Color(0.12f, 0.14f, 0.18f, 0.85f);
-        private const float ResultColumnRatio = 0.38f;
+        // Три столбца: результат | ингредиенты | устройство (где крафтится)
+        private const float ResultColumnRatio = 0.28f;
+        private const float IngredientsColumnRatio = 0.48f;
+        private const float DeviceColumnRatio = 0.22f;
+        private const float ColumnSpacing = 0.01f;
 
         private static void CreatePanel()
         {
@@ -164,16 +168,18 @@ namespace RecipeBook
                 return true;
             };
 
-            // Строка заголовков таблицы
+            // Строка заголовков таблицы (Result | Ingredients | Device)
             var headerRow = new GUILayoutGroup(new RectTransform(new Vector2(1f, 0.045f), layout.RectTransform), isHorizontal: true, childAnchor: Anchor.CenterLeft)
             {
                 Stretch = true,
-                RelativeSpacing = 0.02f,
+                RelativeSpacing = ColumnSpacing,
                 AbsoluteSpacing = GUI.IntScale(4)
             };
             new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), headerRow.RectTransform), "Result", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
-            new GUITextBlock(new RectTransform(new Vector2(1f - ResultColumnRatio - 0.02f, 1f), headerRow.RectTransform), "Ingredients", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), headerRow.RectTransform), "Ingredients", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            { CanBeFocused = false };
+            new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), headerRow.RectTransform), "Device", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
 
             // Прокручиваемый список строк (таблица)
@@ -183,6 +189,7 @@ namespace RecipeBook
             RefreshList();
         }
 
+        /// <summary> Поиск по всему видимому: результат, ингредиенты, устройство (где крафтится). </summary>
         private static bool RecipeMatchesFilter(RecipeBookMod.RecipeEntry entry, string filter)
         {
             if (string.IsNullOrWhiteSpace(filter)) return true;
@@ -191,6 +198,7 @@ namespace RecipeBook
             if (entry.ResultName?.ToLowerInvariant().Contains(f) == true) return true;
             foreach (var ing in entry.Ingredients)
                 if (ing.Name?.ToLowerInvariant().Contains(f) == true) return true;
+            if (entry.DeviceName?.ToLowerInvariant().Contains(f) == true) return true;
             return false;
         }
 
@@ -218,15 +226,17 @@ namespace RecipeBook
                 var rowLayout = new GUILayoutGroup(new RectTransform(new Vector2(0.98f, 0.85f), rowBg.RectTransform, Anchor.CenterLeft), isHorizontal: true, childAnchor: Anchor.CenterLeft)
                 {
                     Stretch = true,
-                    RelativeSpacing = 0.02f,
+                    RelativeSpacing = ColumnSpacing,
                     AbsoluteSpacing = GUI.IntScale(4)
                 };
 
-                var resultBlock = new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform), entry.ResultDisplayName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.Green)
-                { CanBeFocused = false };
+                new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform), entry.ResultDisplayName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.Green)
+                { CanBeFocused = false, OverflowClip = true };
                 string ingredientsStr = string.Join(", ", System.Linq.Enumerable.Select(entry.Ingredients, i => $"{i.Name} ×{i.Amount}"));
-                var ingBlock = new GUITextBlock(new RectTransform(new Vector2(1f - ResultColumnRatio - 0.02f, 1f), rowLayout.RectTransform), ingredientsStr, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal)
-                { CanBeFocused = false };
+                new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), rowLayout.RectTransform), ingredientsStr, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal)
+                { CanBeFocused = false, OverflowClip = true };
+                new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), rowLayout.RectTransform), entry.DeviceName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+                { CanBeFocused = false, OverflowClip = true };
 
                 index++;
             }

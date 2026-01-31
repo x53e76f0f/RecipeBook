@@ -78,19 +78,22 @@ namespace RecipeBook
 
 #if CLIENT
         /// <summary>
-        /// One row for the recipe list: result item + ingredients (name × amount).
+        /// One row for the recipe list: result item + ingredients + device (where it's crafted).
         /// </summary>
         public sealed class RecipeEntry
         {
             public string ResultName { get; }
             public string ResultDisplayName { get; }
             public List<(string Name, int Amount)> Ingredients { get; }
+            /// <summary> Название устройства, где крафтится (Fabricator, Deconstructor, Medical Fabricator и т.д.). </summary>
+            public string DeviceName { get; }
 
-            public RecipeEntry(string resultName, string resultDisplayName, List<(string Name, int Amount)> ingredients)
+            public RecipeEntry(string resultName, string resultDisplayName, List<(string Name, int Amount)> ingredients, string deviceName = "")
             {
                 ResultName = resultName ?? "";
                 ResultDisplayName = resultDisplayName ?? resultName ?? "";
                 Ingredients = ingredients ?? new List<(string, int)>();
+                DeviceName = deviceName ?? "";
             }
         }
 
@@ -119,7 +122,10 @@ namespace RecipeBook
                             }
                         }
                         if (ingredients.Count > 0)
-                            list.Add(new RecipeEntry(resultName, resultDisplayName, ingredients));
+                        {
+                            string deviceName = GetDeviceNameFromRecipe(recipe);
+                            list.Add(new RecipeEntry(resultName, resultDisplayName, ingredients, deviceName));
+                        }
                     }
                 }
             }
@@ -128,6 +134,25 @@ namespace RecipeBook
                 LuaCsLogger.LogError($"[RecipeBook] CollectRecipes: {ex.Message}");
             }
             return list;
+        }
+
+        /// <summary>
+        /// Имя устройства из рецепта: suitablefabricators или "Fabricator" если подходит любой.
+        /// </summary>
+        private static string GetDeviceNameFromRecipe(FabricationRecipe recipe)
+        {
+            if (recipe.SuitableFabricatorIdentifiers.Length == 0)
+                return "Fabricator";
+            var names = new List<string>();
+            foreach (var id in recipe.SuitableFabricatorIdentifiers)
+            {
+                if (id.IsEmpty) continue;
+                if (ItemPrefab.Prefabs.TryGet(id, out var devicePrefab))
+                    names.Add(devicePrefab.Name?.Value ?? id.Value);
+                else
+                    names.Add(id.Value);
+            }
+            return names.Count > 0 ? string.Join(", ", names) : "Fabricator";
         }
 #endif
     }
