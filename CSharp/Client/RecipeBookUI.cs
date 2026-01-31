@@ -72,7 +72,9 @@ namespace RecipeBook
                 // Как в ConfigHub: окно поверх остальных элементов и в дереве канваса
                 if (!ReferenceEquals(_rootFrame.RectTransform.Parent, GUI.Canvas))
                     _rootFrame.RectTransform.Parent = GUI.Canvas;
-                try { _rootFrame.SetAsLastChild(); } catch { /* GUICanvas не держит детей в children — игнорируем */ }
+                // GUICanvas хранит детей в weak refs, не в children — SetAsLastChild даёт ошибку, не вызываем для канваса
+                if (!ReferenceEquals(_rootFrame.RectTransform.Parent, GUI.Canvas))
+                    _rootFrame.SetAsLastChild();
                 _rootFrame.AddToGUIUpdateList(order: 1);
             }
         }
@@ -215,6 +217,7 @@ namespace RecipeBook
             List<RecipeBookMod.RecipeEntry> filtered = _recipes
                 .Where(entry => RecipeMatchesFilter(entry, filter))
                 .OrderBy(entry => GetFilterMatchPriority(entry, filter))
+                .ThenBy(entry => string.IsNullOrWhiteSpace(entry.ResultDisplayName ?? entry.ResultName) ? 1 : 0) // рецепты без названия — в конец
                 .ThenBy(entry => (entry.ResultDisplayName ?? entry.ResultName ?? "").ToLowerInvariant())
                 .ToList();
 

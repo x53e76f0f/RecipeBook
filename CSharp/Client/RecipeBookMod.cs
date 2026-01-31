@@ -138,6 +138,7 @@ namespace RecipeBook
 
         /// <summary>
         /// Имя устройства из рецепта: suitablefabricators или "Fabricator" если подходит любой.
+        /// Для модов: если Name пустой, показываем идентификатор с подчёркиваниями как пробелы.
         /// </summary>
         private static string GetDeviceNameFromRecipe(FabricationRecipe recipe)
         {
@@ -147,10 +148,12 @@ namespace RecipeBook
             foreach (var id in recipe.SuitableFabricatorIdentifiers)
             {
                 if (id.IsEmpty) continue;
-                if (ItemPrefab.Prefabs.TryGet(id, out var devicePrefab))
-                    names.Add(devicePrefab.Name?.Value ?? id.Value);
-                else
-                    names.Add(id.Value);
+                string display = id.Value;
+                if (ItemPrefab.Prefabs.TryGet(id, out var devicePrefab) && !string.IsNullOrWhiteSpace(devicePrefab.Name?.Value))
+                    display = devicePrefab.Name.Value.Trim();
+                else if (!string.IsNullOrEmpty(id.Value))
+                    display = id.Value.Replace("_", " ");
+                names.Add(display);
             }
             return names.Count > 0 ? string.Join(", ", names) : "Fabricator";
         }
