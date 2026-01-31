@@ -1,5 +1,6 @@
 #if CLIENT
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Barotrauma;
@@ -189,17 +190,21 @@ namespace RecipeBook
             RefreshList();
         }
 
-        /// <summary> Поиск по всему видимому: результат, ингредиенты, устройство (где крафтится). </summary>
+        /// <summary> Поиск по всему видимому: результат, ингредиенты, устройство. </summary>
         private static bool RecipeMatchesFilter(RecipeBookMod.RecipeEntry entry, string filter)
+            => GetFilterMatchPriority(entry, filter) >= 0;
+
+        /// <summary> Приоритет совпадения для сортировки: 0 = по названию/id результата, 1 = по ингредиентам, 2 = по Device, -1 = нет совпадения. </summary>
+        private static int GetFilterMatchPriority(RecipeBookMod.RecipeEntry entry, string filter)
         {
-            if (string.IsNullOrWhiteSpace(filter)) return true;
+            if (string.IsNullOrWhiteSpace(filter)) return 0;
             string f = filter.Trim().ToLowerInvariant();
-            if (entry.ResultDisplayName?.ToLowerInvariant().Contains(f) == true) return true;
-            if (entry.ResultName?.ToLowerInvariant().Contains(f) == true) return true;
+            if (entry.ResultDisplayName?.ToLowerInvariant().Contains(f) == true) return 0;
+            if (entry.ResultName?.ToLowerInvariant().Contains(f) == true) return 0;
             foreach (var ing in entry.Ingredients)
-                if (ing.Name?.ToLowerInvariant().Contains(f) == true) return true;
-            if (entry.DeviceName?.ToLowerInvariant().Contains(f) == true) return true;
-            return false;
+                if (ing.Name?.ToLowerInvariant().Contains(f) == true) return 1;
+            if (entry.DeviceName?.ToLowerInvariant().Contains(f) == true) return 2;
+            return -1;
         }
 
         private static void RefreshList()
@@ -207,36 +212,40 @@ namespace RecipeBook
             if (_listBox?.Content?.RectTransform == null || _recipes == null) return;
 
             string filter = _searchBox?.Text?.Trim() ?? "";
-            var filtered = _recipes.Where(e => RecipeMatchesFilter(e, filter)).ToList();
+            List<RecipeBookMod.RecipeEntry> filtered = _recipes
+                .Where(entry => RecipeMatchesFilter(entry, filter))
+                .OrderBy(entry => GetFilterMatchPriority(entry, filter))
+                .ThenBy(entry => (entry.ResultDisplayName ?? entry.ResultName ?? "").ToLowerInvariant())
+                .ToList();
 
             _listBox.Content.ClearChildren();
             int index = 0;
             foreach (var entry in filtered)
             {
-                // Строка таблицы: чередующийся фон (Helmod-стиль)
+                // Строка таблицы: чередующийся фон, перенос текста (подготовка к кликабельным названиям)
                 bool alternate = (index % 2) == 1;
-                var rowBg = new GUIFrame(new RectTransform(new Vector2(1f, 0.055f), _listBox.Content.RectTransform)
+                var rowBg = new GUIFrame(new RectTransform(new Vector2(1f, 0.09f), _listBox.Content.RectTransform)
                 {
-                    MinSize = new Point(0, GUI.IntScale(22))
+                    MinSize = new Point(0, GUI.IntScale(36))
                 }, style: null, color: alternate ? HelmodRowAlt : Color.Transparent)
                 {
                     CanBeFocused = false
                 };
 
-                var rowLayout = new GUILayoutGroup(new RectTransform(new Vector2(0.98f, 0.85f), rowBg.RectTransform, Anchor.CenterLeft), isHorizontal: true, childAnchor: Anchor.CenterLeft)
+                var rowLayout = new GUILayoutGroup(new RectTransform(new Vector2(0.98f, 0.92f), rowBg.RectTransform, Anchor.CenterLeft), isHorizontal: true, childAnchor: Anchor.TopLeft)
                 {
                     Stretch = true,
                     RelativeSpacing = ColumnSpacing,
                     AbsoluteSpacing = GUI.IntScale(4)
                 };
 
-                new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform), entry.ResultDisplayName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.Green)
-                { CanBeFocused = false, OverflowClip = true };
+                new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform), entry.ResultDisplayName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.Green, wrap: true)
+                { CanBeFocused = false };
                 string ingredientsStr = string.Join(", ", System.Linq.Enumerable.Select(entry.Ingredients, i => $"{i.Name} ×{i.Amount}"));
-                new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), rowLayout.RectTransform), ingredientsStr, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal)
-                { CanBeFocused = false, OverflowClip = true };
-                new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), rowLayout.RectTransform), entry.DeviceName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
-                { CanBeFocused = false, OverflowClip = true };
+                new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), rowLayout.RectTransform), ingredientsStr, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal, wrap: true)
+                { CanBeFocused = false };
+                new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), rowLayout.RectTransform), entry.DeviceName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim, wrap: true)
+                { CanBeFocused = false };
 
                 index++;
             }
