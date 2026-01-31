@@ -1,5 +1,6 @@
 #if CLIENT
 
+using System;
 using Barotrauma;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Input;
@@ -7,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 namespace RecipeBook
 {
     /// <summary>
-    /// Открытие Recipe Book по клавише F6 (в GUI.Update).
+    /// Открытие/закрытие Recipe Book по F6; закрытие по любой другой клавише, когда окно открыто и нет фокуса ввода.
     /// </summary>
     [HarmonyPatch(typeof(GUI), nameof(GUI.Update), new[] { typeof(float) })]
     internal static class RecipeBookKeyBindPatch
@@ -15,10 +16,28 @@ namespace RecipeBook
         private static void Postfix(float deltaTime)
         {
             if (GUI.KeyboardDispatcher.Subscriber != null) return; // не перехватывать, если ввод в текстовое поле
-            if (PlayerInput.KeyHit(Keys.F6))
+
+            if (RecipeBookUI.IsPanelVisible)
+            {
+                if (PlayerInput.KeyHit(Keys.F6))
+                    RecipeBookMod.OpenRecipeBook();
+                else if (AnyKeyHitExcept(Keys.F6))
+                    RecipeBookUI.Close();
+            }
+            else if (PlayerInput.KeyHit(Keys.F6))
             {
                 RecipeBookMod.OpenRecipeBook();
             }
+        }
+
+        private static bool AnyKeyHitExcept(Keys exclude)
+        {
+            foreach (Keys key in Enum.GetValues(typeof(Keys)))
+            {
+                if (key == Keys.None || key == exclude) continue;
+                if (PlayerInput.KeyHit(key)) return true;
+            }
+            return false;
         }
     }
 

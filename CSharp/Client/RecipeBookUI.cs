@@ -1,13 +1,14 @@
 #if CLIENT
 
 using System.Collections.Generic;
+using System.Linq;
 using Barotrauma;
 using Microsoft.Xna.Framework;
 
 namespace RecipeBook
 {
     /// <summary>
-    /// Helmod-style recipe list UI: toggle button + frame with scrollable list (result | ingredients).
+    /// Helmod-style recipe list UI: search, toggle button + frame with scrollable list (result | ingredients).
     /// </summary>
     internal static class RecipeBookUI
     {
@@ -16,9 +17,20 @@ namespace RecipeBook
         private static GUIFrame _panelFrame;
         private static GUIButton _toggleButton;
         private static GUIListBox _listBox;
+        private static GUITextBox _searchBox;
 
         /// <summary> UI создан и привязан к канвасу (кнопка и окно есть). У канваса нет GUIComponent, поэтому проверяем RectTransform.Parent. </summary>
         public static bool IsInitialized => _rootFrame != null && _rootFrame.RectTransform.Parent != null;
+
+        /// <summary> Окно сборника рецептов открыто. </summary>
+        public static bool IsPanelVisible => _panelFrame != null && _panelFrame.Visible;
+
+        /// <summary> Закрыть окно (без переключения). </summary>
+        public static void Close()
+        {
+            if (_panelFrame != null)
+                _panelFrame.Visible = false;
+        }
 
         /// <summary>
         /// Добавить корневой фрейм в список обновления/отрисовки GUI. Вызывать каждый кадр, иначе окно не рисуется (как в SpeakerList).
@@ -41,7 +53,7 @@ namespace RecipeBook
                 CanBeFocused = false
             };
 
-            // CreateToggleButton();
+            // CreateToggleButton();  // TODO: Не требуется делать GUI так. Потом разбёмся 
             CreatePanel();
         }
 
@@ -74,6 +86,7 @@ namespace RecipeBook
             _toggleButton = null;
             _panelFrame = null;
             _listBox = null;
+            _searchBox = null;
             _rootFrame = null;
             _recipes = null;
         }
@@ -124,12 +137,31 @@ namespace RecipeBook
             {
                 CanBeFocused = false
             };
-            var headerText = new GUITextBlock(new RectTransform(new Vector2(0.96f, 0.85f), headerBg.RectTransform, Anchor.CenterLeft)
+            var headerText =             new GUITextBlock(new RectTransform(new Vector2(0.96f, 0.85f), headerBg.RectTransform, Anchor.CenterLeft)
             {
                 AbsoluteOffset = new Point(GUI.IntScale(8), 0)
             }, "Recipe Book", font: GUIStyle.SubHeadingFont, textColor: GUIStyle.TextColorBright)
             {
                 CanBeFocused = false
+            };
+
+            // Поиск в стиле Helmod: строка фильтра над таблицей
+            var searchRow = new GUILayoutGroup(new RectTransform(new Vector2(1f, 0.055f), layout.RectTransform), isHorizontal: true, childAnchor: Anchor.CenterLeft)
+            {
+                Stretch = true,
+                RelativeSpacing = 0.02f,
+                AbsoluteSpacing = GUI.IntScale(4)
+            };
+            new GUITextBlock(new RectTransform(new Vector2(0.12f, 1f), searchRow.RectTransform), "Search", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            { CanBeFocused = false };
+            _searchBox = new GUITextBox(new RectTransform(new Vector2(0.86f, 1f), searchRow.RectTransform), "", createClearButton: true)
+            {
+                OverflowClip = true
+            };
+            _searchBox.OnTextChanged += (tb, text) =>
+            {
+                RefreshList();
+                return true;
             };
 
             // Строка заголовков таблицы
@@ -145,19 +177,33 @@ namespace RecipeBook
             { CanBeFocused = false };
 
             // Прокручиваемый список строк (таблица)
-            var listRect = new RectTransform(new Vector2(1f, 0.88f), layout.RectTransform);
+            var listRect = new RectTransform(new Vector2(1f, 0.82f), layout.RectTransform);
             _listBox = new GUIListBox(listRect, isHorizontal: false);
             _listBox.CurrentSelectMode = GUIListBox.SelectMode.None;
             RefreshList();
+        }
+
+        private static bool RecipeMatchesFilter(RecipeBookMod.RecipeEntry entry, string filter)
+        {
+            if (string.IsNullOrWhiteSpace(filter)) return true;
+            string f = filter.Trim().ToLowerInvariant();
+            if (entry.ResultDisplayName?.ToLowerInvariant().Contains(f) == true) return true;
+            if (entry.ResultName?.ToLowerInvariant().Contains(f) == true) return true;
+            foreach (var ing in entry.Ingredients)
+                if (ing.Name?.ToLowerInvariant().Contains(f) == true) return true;
+            return false;
         }
 
         private static void RefreshList()
         {
             if (_listBox?.Content?.RectTransform == null || _recipes == null) return;
 
+            string filter = _searchBox?.Text?.Trim() ?? "";
+            var filtered = _recipes.Where(e => RecipeMatchesFilter(e, filter)).ToList();
+
             _listBox.Content.ClearChildren();
             int index = 0;
-            foreach (var entry in _recipes)
+            foreach (var entry in filtered)
             {
                 // Строка таблицы: чередующийся фон (Helmod-стиль)
                 bool alternate = (index % 2) == 1;
