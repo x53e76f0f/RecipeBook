@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<infotexts language="English" nowhitespace="false" translatedname="English">
+  <!-- Recipe Book mod -->
+  <recipebook.title>Recipe Book</recipebook.title>
+  <recipebook.hintf6>Recipe Book · F6</recipebook.hintf6>
+  <recipebook.search>Search</recipebook.search>
+  <recipebook.result>Result</recipebook.result>
+  <recipebook.ingredients>Ingredients</recipebook.ingredients>
+  <recipebook.device>Device</recipebook.device>
+  <recipebook.ingredientsdropdown>Composition ▾</recipebook.ingredientsdropdown>
+  <recipebook.ingredientsdropdown.tooltip>Show ingredients</recipebook.ingredientsdropdown.tooltip>
+  <recipebook.fabricatorbutton>Recipe Book</recipebook.fabricatorbutton>
+  <recipebook.fabricatorbutton.tooltip>Open Recipe Book (F6)</recipebook.fabricatorbutton.tooltip>
+  <recipebook.collapse>Collapse</recipebook.collapse>
+  <recipebook.console.notinlevel>Enter a campaign or submarine and press F6 or type recipebook.</recipebook.console.notinlevel>
+</infotexts>

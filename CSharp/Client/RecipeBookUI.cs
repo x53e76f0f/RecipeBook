@@ -193,15 +193,22 @@ namespace RecipeBook
                 RelativeSpacing = 0.008f
             };
 
-            // Полоса заголовка (Helmod: тёмная шапка)
+            // Полоса заголовка (Helmod: тёмная шапка) + ненавязчивая подсказка F6 справа
             var headerBg = new GUIFrame(new RectTransform(new Vector2(1f, 0.07f), layout.RectTransform), style: null, color: HelmodHeaderBg)
             {
                 CanBeFocused = false
             };
-            var headerText =             new GUITextBlock(new RectTransform(new Vector2(0.96f, 0.85f), headerBg.RectTransform, Anchor.CenterLeft)
+            var headerText = new GUITextBlock(new RectTransform(new Vector2(0.96f, 0.85f), headerBg.RectTransform, Anchor.CenterLeft)
             {
                 AbsoluteOffset = new Point(GUI.IntScale(8), 0)
-            }, "Recipe Book", font: GUIStyle.SubHeadingFont, textColor: GUIStyle.TextColorBright)
+            }, TextManager.Get("recipebook.title"), font: GUIStyle.SubHeadingFont, textColor: GUIStyle.TextColorBright)
+            {
+                CanBeFocused = false
+            };
+            new GUITextBlock(new RectTransform(new Vector2(0.5f, 0.7f), headerBg.RectTransform, Anchor.CenterRight)
+            {
+                AbsoluteOffset = new Point(-GUI.IntScale(8), 0)
+            }, TextManager.Get("recipebook.hintf6"), font: GUIStyle.SmallFont, textColor: new Color(1f, 1f, 1f, 0.45f))
             {
                 CanBeFocused = false
             };
@@ -213,7 +220,7 @@ namespace RecipeBook
                 RelativeSpacing = 0.02f,
                 AbsoluteSpacing = GUI.IntScale(4)
             };
-            new GUITextBlock(new RectTransform(new Vector2(0.12f, 1f), searchRow.RectTransform), "Search", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            new GUITextBlock(new RectTransform(new Vector2(0.12f, 1f), searchRow.RectTransform), TextManager.Get("recipebook.search"), font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
             _searchBox = new GUITextBox(new RectTransform(new Vector2(0.86f, 1f), searchRow.RectTransform), "", createClearButton: true)
             {
@@ -232,11 +239,11 @@ namespace RecipeBook
                 RelativeSpacing = ColumnSpacing,
                 AbsoluteSpacing = GUI.IntScale(4)
             };
-            new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), headerRow.RectTransform), "Result", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), headerRow.RectTransform), TextManager.Get("recipebook.result"), font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
-            new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), headerRow.RectTransform), "Ingredients", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), headerRow.RectTransform), TextManager.Get("recipebook.ingredients"), font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
-            new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), headerRow.RectTransform), "Device", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
+            new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), headerRow.RectTransform), TextManager.Get("recipebook.device"), font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim)
             { CanBeFocused = false };
 
             // Прокручиваемый список строк (таблица)
@@ -331,13 +338,13 @@ namespace RecipeBook
                 {
                     var dropdownRect = new RectTransform(new Vector2(IngredientsDropdownButtonRatio, 1f), ingredientsColumn.RectTransform)
                     { MinSize = new Point(GUI.IntScale(52), 0) };
-                    var dropdownBtn = new GUIButton(dropdownRect, "Состав ▾", Alignment.Center, style: null)
+                    var dropdownBtn = new GUIButton(dropdownRect, TextManager.Get("recipebook.ingredientsdropdown"), Alignment.Center, style: null)
                     {
                         Color = Color.Transparent,
                         HoverColor = new Color(1f, 1f, 1f, 0.12f),
                         TextColor = GUIStyle.TextColorDim,
                         Font = GUIStyle.SmallFont,
-                        ToolTip = "Показать ингредиенты"
+                        ToolTip = TextManager.Get("recipebook.ingredientsdropdown.tooltip")
                     };
                     dropdownBtn.Frame.Color = Color.Transparent;
                     dropdownBtn.Frame.HoverColor = dropdownBtn.HoverColor;

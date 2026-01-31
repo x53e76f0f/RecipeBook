@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<infotexts language="Russian" nowhitespace="false" translatedname="Русский">
+  <!-- Recipe Book mod -->
+  <recipebook.title>Сборник рецептов</recipebook.title>
+  <recipebook.hintf6>Сборник рецептов · F6</recipebook.hintf6>
+  <recipebook.search>Поиск</recipebook.search>
+  <recipebook.result>Результат</recipebook.result>
+  <recipebook.ingredients>Ингредиенты</recipebook.ingredients>
+  <recipebook.device>Устройство</recipebook.device>
+  <recipebook.ingredientsdropdown>Состав ▾</recipebook.ingredientsdropdown>
+  <recipebook.ingredientsdropdown.tooltip>Показать ингредиенты</recipebook.ingredientsdropdown.tooltip>
+  <recipebook.fabricatorbutton>Сборник рецептов</recipebook.fabricatorbutton>
+  <recipebook.fabricatorbutton.tooltip>Открыть сборник рецептов (F6)</recipebook.fabricatorbutton.tooltip>
+  <recipebook.collapse>Свернуть</recipebook.collapse>
+  <recipebook.console.notinlevel>Зайдите в кампанию или подлодку и нажмите F6 или введите recipebook.</recipebook.console.notinlevel>
+</infotexts>

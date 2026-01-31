@@ -28,6 +28,8 @@ namespace RecipeBook
         {
 #if CLIENT
             _harmony?.PatchAll();
+            // try { RecipeBookFabricatorButton.ApplyPatch(_harmony); }
+            // catch (Exception ex) { LuaCsLogger.LogError($"[RecipeBook] ApplyPatch Fabricator: {ex.Message}"); }
             IReadOnlyList<RecipeEntry> recipes = CollectRecipes();
             RecipeBookUI.Initialize(recipes);
             RegisterConsoleCommand();
@@ -46,7 +48,7 @@ namespace RecipeBook
             if (RecipeBookUI.IsInitialized)
                 RecipeBookUI.Toggle();
             else
-                DebugConsole.NewMessage("[Recipe Book] Зайдите в кампанию/подлодку и нажмите F6 или введите recipebook.", Microsoft.Xna.Framework.Color.Orange);
+                DebugConsole.NewMessage("[Recipe Book] " + TextManager.Get("recipebook.console.notinlevel").Value, Microsoft.Xna.Framework.Color.Orange);
         }
 
         private static void RegisterConsoleCommand()
