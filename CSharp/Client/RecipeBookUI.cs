@@ -118,6 +118,33 @@ namespace RecipeBook
         private const float IngredientsColumnRatio = 0.48f;
         private const float DeviceColumnRatio = 0.22f;
         private const float ColumnSpacing = 0.01f;
+        /// <summary> Доля колонки ингредиентов под кнопку «Состав ▾» (остальное — текст списка). </summary>
+        private const float IngredientsDropdownButtonRatio = 0.18f;
+
+        /// <summary> Кнопка, выглядящая как текст: по клику подставляет текст в поиск и обновляет список. </summary>
+        private static GUIButton CreateSearchClickButton(RectTransform rect, string text, Color textColor, string searchValueOnClick)
+        {
+            var btn = new GUIButton(rect, text ?? "", Alignment.CenterLeft, style: null)
+            {
+                Color = Color.Transparent,
+                HoverColor = new Color(1f, 1f, 1f, 0.12f),
+                PressedColor = new Color(1f, 1f, 1f, 0.08f),
+                TextColor = textColor,
+                CanBeFocused = true
+            };
+            btn.Frame.Color = Color.Transparent;
+            btn.Frame.HoverColor = btn.HoverColor;
+            btn.Frame.PressedColor = btn.PressedColor;
+            btn.Frame.CanBeFocused = false;
+            if (btn.TextBlock != null) { btn.TextBlock.CanBeFocused = false; }
+            string capture = searchValueOnClick ?? text ?? "";
+            btn.OnClicked = (_, __) =>
+            {
+                if (_searchBox != null) { _searchBox.Text = capture; RefreshList(); }
+                return true;
+            };
+            return btn;
+        }
 
         private static void CreatePanel()
         {
@@ -242,13 +269,74 @@ namespace RecipeBook
                     AbsoluteSpacing = GUI.IntScale(4)
                 };
 
-                new GUITextBlock(new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform), entry.ResultDisplayName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.Green, wrap: true)
-                { CanBeFocused = false };
-                string ingredientsStr = string.Join(", ", System.Linq.Enumerable.Select(entry.Ingredients, i => $"{i.Name} ×{i.Amount}"));
-                new GUITextBlock(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), rowLayout.RectTransform), ingredientsStr, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal, wrap: true)
-                { CanBeFocused = false };
-                new GUITextBlock(new RectTransform(new Vector2(DeviceColumnRatio, 1f), rowLayout.RectTransform), entry.DeviceName ?? "", font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorDim, wrap: true)
-                { CanBeFocused = false };
+                // Результат — клик подставляет название в поиск
+                var resultBtn = CreateSearchClickButton(
+                    new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform),
+                    entry.ResultDisplayName ?? "",
+                    GUIStyle.Green,
+                    entry.ResultDisplayName ?? entry.ResultName ?? "");
+                resultBtn.Font = GUIStyle.SmallFont;
+                if (resultBtn.TextBlock != null) resultBtn.TextBlock.Wrap = true;
+
+                // Ингредиенты: один GUITextBlock (список с переносом) + кнопка «Состав ▾» только если ингредиентов > 1; по клику — выпадающее меню
+                int ingCount = entry.Ingredients.Count;
+                string ingredientsListText = string.Join(", ", entry.Ingredients.Select(ing => $"{ing.Name} ×{ing.Amount}"));
+                float textRatio = ingCount > 1 ? (1f - IngredientsDropdownButtonRatio) : 1f;
+
+                var ingredientsColumn = new GUILayoutGroup(new RectTransform(new Vector2(IngredientsColumnRatio, 1f), rowLayout.RectTransform), isHorizontal: true, childAnchor: Anchor.CenterLeft)
+                {
+                    Stretch = true,
+                    RelativeSpacing = 0.02f,
+                    AbsoluteSpacing = GUI.IntScale(4)
+                };
+
+                var textRect = new RectTransform(new Vector2(textRatio, 1f), ingredientsColumn.RectTransform);
+                var ingredientsText = new GUITextBlock(textRect, ingredientsListText, font: GUIStyle.SmallFont, textColor: GUIStyle.TextColorNormal)
+                {
+                    Wrap = true,
+                    CanBeFocused = false
+                };
+
+                if (ingCount > 1)
+                {
+                    var dropdownRect = new RectTransform(new Vector2(IngredientsDropdownButtonRatio, 1f), ingredientsColumn.RectTransform)
+                    { MinSize = new Point(GUI.IntScale(52), 0) };
+                    var dropdownBtn = new GUIButton(dropdownRect, "Состав ▾", Alignment.Center, style: null)
+                    {
+                        Color = Color.Transparent,
+                        HoverColor = new Color(1f, 1f, 1f, 0.12f),
+                        TextColor = GUIStyle.TextColorDim,
+                        Font = GUIStyle.SmallFont,
+                        ToolTip = "Показать ингредиенты"
+                    };
+                    dropdownBtn.Frame.Color = Color.Transparent;
+                    dropdownBtn.Frame.HoverColor = dropdownBtn.HoverColor;
+
+                    var ingredientsForMenu = entry.Ingredients.ToList();
+                    dropdownBtn.OnClicked = (_, __) =>
+                    {
+                        var options = ingredientsForMenu.Select(ing =>
+                        {
+                            string name = ing.Name ?? "";
+                            string label = $"{ing.Name} ×{ing.Amount}";
+                            return new ContextMenuOption(label, isEnabled: true, onSelected: () =>
+                            {
+                                if (_searchBox != null) { _searchBox.Text = name; RefreshList(); }
+                            });
+                        }).ToArray();
+                        GUIContextMenu.CreateContextMenu(PlayerInput.MousePosition, "", null, options);
+                        return true;
+                    };
+                }
+
+                // Устройство — клик подставляет название устройства в поиск
+                var deviceBtn = CreateSearchClickButton(
+                    new RectTransform(new Vector2(DeviceColumnRatio, 1f), rowLayout.RectTransform),
+                    entry.DeviceName ?? "",
+                    GUIStyle.TextColorDim,
+                    entry.DeviceName ?? "");
+                deviceBtn.Font = GUIStyle.SmallFont;
+                deviceBtn.RectTransform.MinSize = new Point(GUI.IntScale(50), 0);
 
                 index++;
             }
