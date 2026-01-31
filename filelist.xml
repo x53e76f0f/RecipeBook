@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<contentpackage name="RecipeBook" corepackage="false" gameversion="1.0.0.0">
+  <!-- C# in-memory: LuaCs сканирует папку CSharp/ и компилирует .cs при загрузке -->
+  <!-- <CSharp /> -->
+</contentpackage>
