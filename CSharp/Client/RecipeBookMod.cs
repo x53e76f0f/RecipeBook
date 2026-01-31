@@ -87,13 +87,16 @@ namespace RecipeBook
             public List<(string Name, int Amount)> Ingredients { get; }
             /// <summary> Название устройства, где крафтится (Fabricator, Deconstructor, Medical Fabricator и т.д.). </summary>
             public string DeviceName { get; }
+            /// <summary> Префаб результата для иконки (InventoryIcon / Sprite). null — иконку не показывать. </summary>
+            public ItemPrefab ResultItemPrefab { get; }
 
-            public RecipeEntry(string resultName, string resultDisplayName, List<(string Name, int Amount)> ingredients, string deviceName = "")
+            public RecipeEntry(string resultName, string resultDisplayName, List<(string Name, int Amount)> ingredients, string deviceName = "", ItemPrefab resultItemPrefab = null)
             {
                 ResultName = resultName ?? "";
                 ResultDisplayName = resultDisplayName ?? resultName ?? "";
                 Ingredients = ingredients ?? new List<(string, int)>();
                 DeviceName = deviceName ?? "";
+                ResultItemPrefab = resultItemPrefab;
             }
         }
 
@@ -124,7 +127,8 @@ namespace RecipeBook
                         if (ingredients.Count > 0)
                         {
                             string deviceName = GetDeviceNameFromRecipe(recipe);
-                            list.Add(new RecipeEntry(resultName, resultDisplayName, ingredients, deviceName));
+                            ItemPrefab.Prefabs.TryGet(recipe.TargetItemPrefabIdentifier, out ItemPrefab resultPrefab);
+                            list.Add(new RecipeEntry(resultName, resultDisplayName, ingredients, deviceName, resultPrefab));
                         }
                     }
                 }

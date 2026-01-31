@@ -121,6 +121,9 @@ namespace RecipeBook
         /// <summary> Доля колонки ингредиентов под кнопку «Состав ▾» (остальное — текст списка). </summary>
         private const float IngredientsDropdownButtonRatio = 0.18f;
 
+        /// <summary> Размер иконки результата (квадрат, 16–20 px, SmallFont-совместимо). </summary>
+        private const int ResultIconSize = 18;
+
         /// <summary> Кнопка, выглядящая как текст: по клику подставляет текст в поиск и обновляет список. </summary>
         private static GUIButton CreateSearchClickButton(RectTransform rect, string text, Color textColor, string searchValueOnClick)
         {
@@ -144,6 +147,30 @@ namespace RecipeBook
                 return true;
             };
             return btn;
+        }
+
+        /// <summary> Добавить иконку результата слева от текста внутри кнопки. Иконка — часть кликабельной зоны. Если prefab/sprite нет — ничего не добавляем. </summary>
+        private static void AddResultIconToButton(GUIButton button, ItemPrefab resultPrefab)
+        {
+            if (resultPrefab == null) return;
+            Sprite sprite = resultPrefab.InventoryIcon ?? resultPrefab.Sprite;
+            if (sprite == null) return;
+            Color iconColor = sprite == resultPrefab.Sprite ? resultPrefab.SpriteColor : resultPrefab.InventoryIconColor;
+            int size = GUI.IntScale(ResultIconSize);
+            var iconRect = new RectTransform(new Point(size, size), button.RectTransform, Anchor.CenterLeft)
+            { AbsoluteOffset = new Point(GUI.IntScale(2), 0) };
+            var img = new GUIImage(iconRect, sprite, scaleToFit: true)
+            {
+                Color = iconColor,
+                HoverColor = iconColor,
+                CanBeFocused = false
+            };
+            img.RectTransform.SetAsFirstChild();
+            if (button.TextBlock != null)
+            {
+                int leftPad = size + GUI.IntScale(4);
+                button.TextBlock.Padding = new Vector4(leftPad, button.TextBlock.Padding.Y, button.TextBlock.Padding.Z, button.TextBlock.Padding.W);
+            }
         }
 
         private static void CreatePanel()
@@ -269,7 +296,7 @@ namespace RecipeBook
                     AbsoluteSpacing = GUI.IntScale(4)
                 };
 
-                // Результат — клик подставляет название в поиск
+                // Результат: [иконка] название — одна кликабельная зона, иконка только из ItemPrefab (результат)
                 var resultBtn = CreateSearchClickButton(
                     new RectTransform(new Vector2(ResultColumnRatio, 1f), rowLayout.RectTransform),
                     entry.ResultDisplayName ?? "",
@@ -277,6 +304,9 @@ namespace RecipeBook
                     entry.ResultDisplayName ?? entry.ResultName ?? "");
                 resultBtn.Font = GUIStyle.SmallFont;
                 if (resultBtn.TextBlock != null) resultBtn.TextBlock.Wrap = true;
+                resultBtn.HoverColor = new Color(1f, 1f, 1f, 0.08f);
+                resultBtn.Frame.HoverColor = resultBtn.HoverColor;
+                AddResultIconToButton(resultBtn, entry.ResultItemPrefab);
 
                 // Ингредиенты: один GUITextBlock (список с переносом) + кнопка «Состав ▾» только если ингредиентов > 1; по клику — выпадающее меню
                 int ingCount = entry.Ingredients.Count;
