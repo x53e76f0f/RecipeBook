@@ -9,7 +9,7 @@ namespace RecipeBook
 {
     /// <summary>
     /// Recipe Book mod: collects fabrication recipes and shows a Helmod-style list (result | ingredients).
-    /// Client-only. Открытие: F6, или команда recipebook/rb, или кнопка внизу справа.
+    /// Client-only. Открытие: F1, или команда recipebook/rb, или кнопка внизу справа.
     /// </summary>
     public class RecipeBookMod : IAssemblyPlugin
     {
@@ -37,7 +37,7 @@ namespace RecipeBook
         }
 
 #if CLIENT
-        /// <summary> Открыть/закрыть окно. Вызывается по F6, команде recipebook/rb или кнопке. </summary>
+        /// <summary> Открыть/закрыть окно. Вызывается по F1, команде recipebook/rb или кнопке. </summary>
         public static void OpenRecipeBook()
         {
             if (!RecipeBookUI.IsInitialized)

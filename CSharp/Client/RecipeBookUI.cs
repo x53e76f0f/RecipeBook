@@ -103,7 +103,7 @@ namespace RecipeBook
             {
                 AbsoluteOffset = new Point((int)(24 * scale), 0)
             };
-            _toggleButton = new GUIButton(rect, "Recipe Book (F6)", Alignment.Center, "GUIButtonSmall")
+            _toggleButton = new GUIButton(rect, "Recipe Book (F1)", Alignment.Center, "GUIButtonSmall")
             {
                 OnClicked = (btn, _) => { RecipeBookMod.OpenRecipeBook(); return true; }
             };
@@ -193,7 +193,7 @@ namespace RecipeBook
                 RelativeSpacing = 0.008f
             };
 
-            // Полоса заголовка (Helmod: тёмная шапка) + ненавязчивая подсказка F6 справа
+            // Полоса заголовка (Helmod: тёмная шапка) + ненавязчивая подсказка F1 справа
             var headerBg = new GUIFrame(new RectTransform(new Vector2(1f, 0.07f), layout.RectTransform), style: null, color: HelmodHeaderBg)
             {
                 CanBeFocused = false
@@ -208,7 +208,7 @@ namespace RecipeBook
             new GUITextBlock(new RectTransform(new Vector2(0.5f, 0.7f), headerBg.RectTransform, Anchor.CenterRight)
             {
                 AbsoluteOffset = new Point(-GUI.IntScale(8), 0)
-            }, TextManager.Get("recipebook.hintf6"), font: GUIStyle.SmallFont, textColor: new Color(1f, 1f, 1f, 0.45f))
+            }, TextManager.Get("recipebook.hintF1"), font: GUIStyle.SmallFont, textColor: new Color(1f, 1f, 1f, 0.45f))
             {
                 CanBeFocused = false
             };

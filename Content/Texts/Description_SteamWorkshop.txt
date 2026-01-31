@@ -1,0 +1,63 @@
+================================================================================
+Recipe Book — описание для Steam Workshop (RU / EN / ZH)
+================================================================================
+Копируйте нужный блок в описание мода. Короткое — для превью, полное — в тело.
+
+--------------------------------------------------------------------------------
+РУССКИЙ (RU)
+--------------------------------------------------------------------------------
+
+[Короткое — название / превью]
+Recipe Book — Сборник рецептов
+
+[Полное — вставить в описание]
+Recipe Book — клиентский мод для Barotrauma, который собирает все рецепты изготовления (фабрикатор, дефибриллятор и др.) и показывает их в одном окне в стиле Helmod: результат крафта слева, список ингредиентов справа.
+
+Как пользоваться:
+• Откройте окно по клавише F1, консольной команде recipebook (или rb).
+• Введите текст в поле поиска, чтобы отфильтровать рецепты по названию результата или ингредиентов.
+• Прокручивайте список и раскрывайте строки «Ингредиенты», чтобы увидеть полный состав.
+
+Мод не меняет баланс и не добавляет новые рецепты — только удобный просмотр уже существующих в игре.
+Поддержка модификаций.
+Требуется LuaCsForBarotrauma.
+
+--------------------------------------------------------------------------------
+ENGLISH (EN)
+--------------------------------------------------------------------------------
+
+[Short — title / preview]
+Recipe Book — Crafting Recipe Browser
+
+[Full — paste into description]
+Recipe Book is a client-side mod for Barotrauma that collects all fabrication recipes (fabricator, defibrillator, etc.) and displays them in a single Helmod-style window: craft result on the left, ingredient list on the right.
+
+How to use:
+• Open the window with the F1 key or the console command recipebook (or rb).
+• Type in the search box to filter recipes by result or ingredient names.
+• Scroll the list and expand “Ingredients” rows to see the full recipe.
+
+The mod does not change balance or add new recipes — it only provides a convenient view of existing in-game recipes.
+Supports other mods’ recipes.
+Requires LuaCsForBarotrauma.
+
+--------------------------------------------------------------------------------
+中文 (ZH — 简体)
+--------------------------------------------------------------------------------
+
+[简短 — 标题 / 预览]
+Recipe Book — 制作配方手册
+
+[完整 — 粘贴到描述]
+Recipe Book 是 Barotrauma 的纯客户端模组，会收集所有制作配方（制造台、除颤器等），并在一个 Helmod 风格的窗口中显示：左侧为制作结果，右侧为原料列表。
+
+使用方法：
+• 按 F1 或输入控制台命令 recipebook（或 rb）打开窗口。
+• 在搜索框中输入文字，可按结果或原料名称筛选配方。
+• 滚动列表并展开「原料」行以查看完整配方。
+
+本模组不改变平衡，也不添加新配方，仅提供游戏中已有配方的便捷查看。
+支持其他模组的配方。
+需要 LuaCsForBarotrauma。
+
+================================================================================

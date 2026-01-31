@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 namespace RecipeBook
 {
     /// <summary>
-    /// Открытие/закрытие Recipe Book по F6; закрытие по любой другой клавише, когда окно открыто и нет фокуса ввода.
+    /// Открытие/закрытие Recipe Book по F1; закрытие по любой другой клавише, когда окно открыто и нет фокуса ввода.
     /// </summary>
     [HarmonyPatch(typeof(GUI), nameof(GUI.Update), new[] { typeof(float) })]
     internal static class RecipeBookKeyBindPatch
@@ -19,12 +19,12 @@ namespace RecipeBook
 
             if (RecipeBookUI.IsPanelVisible)
             {
-                if (PlayerInput.KeyHit(Keys.F6))
+                if (PlayerInput.KeyHit(Keys.F1))
                     RecipeBookMod.OpenRecipeBook();
-                else if (AnyKeyHitExcept(Keys.F6))
+                else if (AnyKeyHitExcept(Keys.F1))
                     RecipeBookUI.Close();
             }
-            else if (PlayerInput.KeyHit(Keys.F6))
+            else if (PlayerInput.KeyHit(Keys.F1))
             {
                 RecipeBookMod.OpenRecipeBook();
             }
